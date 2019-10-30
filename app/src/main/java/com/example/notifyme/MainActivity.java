@@ -18,22 +18,27 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button button_notify;
+
     private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
-    private NotificationManager mNotifyManager;
     private static final int NOTIFICATION_ID = 0;
-
     private static final String ACTION_UPDATE_NOTIFICATION = "com.example.android.notifyme.ACTION_UPDATE_NOTIFICATION";
-    private NotificationReceiver mReceiver = new NotificationReceiver();
 
 
 
+    private Button button_notify;
     private Button button_cancel;
     private Button button_update;
+
+    private NotificationManager mNotifyManager;
+    private NotificationReceiver mReceiver = new NotificationReceiver();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        createNotificationChannel();
+        registerReceiver(mReceiver,new IntentFilter(ACTION_UPDATE_NOTIFICATION));
 
         button_notify = findViewById(R.id.notify);
         button_notify.setOnClickListener(new View.OnClickListener() {
@@ -43,8 +48,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        createNotificationChannel();
-
+        //button_update = (Button) findViewById(R.id.update);
         button_update = findViewById(R.id.update);
         button_update.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,9 +66,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         setNotificationButtonState(true, false, false);
-
-        registerReceiver(mReceiver,new IntentFilter(ACTION_UPDATE_NOTIFICATION));
-
 
     }
 
@@ -96,12 +97,11 @@ public class MainActivity extends AppCompatActivity {
 
 
         NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
+        notifyBuilder.addAction(R.drawable.ic_update, "Update Notification", updatePendingIntent);
+
         mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
 
         setNotificationButtonState(false, true, true);
-
-
-        notifyBuilder.addAction(R.drawable.ic_update, "Update Notification", updatePendingIntent);
     }
 
     private NotificationCompat.Builder getNotificationBuilder(){
@@ -109,10 +109,6 @@ public class MainActivity extends AppCompatActivity {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent notificationPendingIntent = PendingIntent.getActivity(this,
                 NOTIFICATION_ID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-
-
 
         NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, PRIMARY_CHANNEL_ID)
                 .setContentTitle("You've been notified!")
